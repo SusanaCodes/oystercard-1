@@ -5,24 +5,26 @@ describe Oystercard do
     expect(subject.balance).to eq (0)
   end
   
-describe '#top_up' do
-  it { is_expected.to respond_to(:top_up).with(1).argument }
+  describe '#top_up' do
+    it { is_expected.to respond_to(:top_up).with(1).argument }
   end
 
   it 'can top up the balance' do
     expect{ subject.top_up 1 }.to change{ subject.balance }.by 1
   end
+  context 'testing balance limit' do
+    before(:each) do
+      @maximum_balance = Oystercard::MAXIMUM_BALANCE
+      subject.top_up(@maximum_balance)
+    end 
+    it 'raises an error if the maximun balance is exceeded' do
+      expect{ subject.top_up 1 }.to raise_error "maximum balance of #{@maximum_balance} exceeded"
+    end
 
-  it 'raises an error if the maximun balance is exceeded' do
-    maximum_balance = Oystercard::MAXIMUM_BALANCE
-    subject.top_up(maximum_balance)
-    expect{ subject.top_up 1 }.to raise_error "maximum balance of #{maximum_balance} exceeded"
-  end
-
-  it{ is_expected.to respond_to(:deduct).with(1).argument }
-  it 'deducts amount from the balance' do
-    subject.top_up(20)
-    expect{ subject.deduct 3 }.to change { subject.balance }.by -3
+    it{ is_expected.to respond_to(:deduct).with(1).argument }
+    it 'deducts amount from the balance' do
+      expect{ subject.deduct 3 }.to change { subject.balance }.by -3
+    end
   end
 
   it 'is initially not in a journey' do
